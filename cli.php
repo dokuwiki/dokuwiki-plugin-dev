@@ -40,6 +40,7 @@ class cli_plugin_dev extends CLIPlugin
         $options->registerArgument('name', 'Optional name of the component', false, 'addComponent');
 
         $options->registerCommand('deletedFiles', 'create the list of deleted files base on the git history');
+        $options->registerCommand('rmObsolete', 'delete obsolete files');
     }
 
     /** @inheritDoc */
@@ -63,6 +64,8 @@ class cli_plugin_dev extends CLIPlugin
                 return $this->cmdAddComponent($type, $component);
             case 'deletedFiles':
                 return $this->cmdDeletedFiles();
+            case 'rmObsolete':
+                return $this->rmObsolete();
             default:
                 echo $options->help();
                 return 0;
@@ -237,6 +240,44 @@ class cli_plugin_dev extends CLIPlugin
     }
 
     /**
+     * Delete the given file if it exists
+     *
+     * @param string $file
+     */
+    protected function deleteFile($file)
+    {
+        if (!file_exists($file)) return;
+        if (@unlink($file)) {
+            $this->success('Delete ' . $file);
+        }
+    }
+
+    /**
+     * Run git with the given arguments and return the output
+     *
+     * @throws CliException when the command can't be run
+     * @param string ...$args
+     * @return string[]
+     */
+    protected function git(...$args)
+    {
+        $args = array_map('escapeshellarg', $args);
+        $cmd = 'git ' . join(' ', $args);
+        $output = [];
+        $result = 0;
+
+        $this->info($cmd);
+        $last = exec($cmd, $output, $result);
+        if ($last === false || $result !== 0) {
+            throw new CliException('Running git failed');
+        }
+
+        return $output;
+    }
+
+    // region Commands
+
+    /**
      * Intialize the current directory as a plugin or template
      *
      * @return int
@@ -370,7 +411,7 @@ class cli_plugin_dev extends CLIPlugin
      */
     protected function cmdDeletedFiles()
     {
-        if(!is_dir('.git')) throw new CliException('This extension seems not to be managed by git');
+        if (!is_dir('.git')) throw new CliException('This extension seems not to be managed by git');
 
         $output = $this->git('log', '--no-renames', '--pretty=format:', '--name-only', '--diff-filter=D');
         $output = array_map('trim', $output);
@@ -396,25 +437,15 @@ class cli_plugin_dev extends CLIPlugin
     }
 
     /**
-     * Run git with the given arguments and return the output
-     *
-     * @throws CliException when the command can't be run
-     * @param string ...$args
-     * @return string[]
+     * Remove files that shouldn't be here anymore
      */
-    protected function git(...$args)
+    protected function rmObsolete()
     {
-        $args = array_map('escapeshellarg', $args);
-        $cmd = 'git ' . join(' ', $args);
-        $output = [];
-        $result = 0;
+        $this->deleteFile('_test/general.test.php');
+        $this->deleteFile('.travis.yml');
 
-        $this->info($cmd);
-        $last = exec($cmd, $output, $result);
-        if ($last === false || $result !== 0) {
-            throw new CliException('Running git failed');
-        }
-
-        return $output;
+        return 0;
     }
+
+    //endregion
 }
