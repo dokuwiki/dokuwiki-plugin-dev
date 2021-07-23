@@ -21,26 +21,35 @@ class cli_plugin_dev extends CLIPlugin
      */
     protected function setup(Options $options)
     {
+        $options->useCompactHelp();
         $options->setHelp(
-            "CLI to help with plugin and template development\n\n" .
+            "CLI to help with DokuWiki plugin and template development.\n\n" .
             "Run this script from within the extension's directory."
         );
 
-        $options->registerCommand('init', 'initialize a new plugin or template');
-        $options->registerCommand('addTest', 'add the testing framework files and optionall a new test file');
-        $options->registerArgument('test', 'The name of the new test, leave out for general test.', false, 'addTest');
-        $options->registerCommand('addConf', 'add the configuration files');
-        $options->registerCommand('addLang', 'add the language files');
+        $options->registerCommand('init', 'Initialize a new plugin or template in the current (empty) directory.');
+        $options->registerCommand('addTest', 'Add the testing framework files and a test. (_test/)');
+        $options->registerArgument('test', 'Optional name of the new test. Defaults to the general test.', false,
+            'addTest');
+        $options->registerCommand('addConf', 'Add the configuration files. (conf/)');
+        $options->registerCommand('addLang', 'Add the language files. (lang/)');
 
-        $options->registerCommand('addComponent', 'add a component');
-        $options->registerArgument('type', 'The type of the component. Needs to be one of ' .
-            join(', ', PluginController::PLUGIN_TYPES),
-            true, 'addComponent'
+        $types = PluginController::PLUGIN_TYPES;
+        array_walk(
+            $types,
+            function (&$item) {
+                $item = $this->colors->wrap($item, $this->colors::C_BROWN);
+            }
         );
-        $options->registerArgument('name', 'Optional name of the component', false, 'addComponent');
 
-        $options->registerCommand('deletedFiles', 'create the list of deleted files base on the git history');
-        $options->registerCommand('rmObsolete', 'delete obsolete files');
+        $options->registerCommand('addComponent', 'Add a new plugin component.');
+        $options->registerArgument('type', 'Type of the component. Needs to be one of ' . join(', ', $types), true,
+            'addComponent');
+        $options->registerArgument('name', 'Optional name of the component. Defaults to a base component.', false,
+            'addComponent');
+
+        $options->registerCommand('deletedFiles', 'Create the list of deleted files based on the git history.');
+        $options->registerCommand('rmObsolete', 'Delete obsolete files.');
     }
 
     /** @inheritDoc */
