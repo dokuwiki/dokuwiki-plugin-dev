@@ -266,6 +266,12 @@ class cli_plugin_dev extends CLIPlugin
         $this->loadSkeleton('README.skel', 'README', $replacements); // fixme needs to be type specific
         $this->loadSkeleton('LICENSE.skel', 'LICENSE', $replacements);
 
+        try {
+            $this->git('init');
+        } catch (CliException $e) {
+            $this->error($e->getMessage());
+        }
+
         return 0;
     }
 
@@ -364,15 +370,9 @@ class cli_plugin_dev extends CLIPlugin
      */
     protected function cmdDeletedFiles()
     {
-        $cmd = 'git log --no-renames --pretty=format: --name-only --diff-filter=D';
-        $output = [];
-        $result = 0;
+        if(!is_dir('.git')) throw new CliException('This extension seems not to be managed by git');
 
-        $last = exec($cmd, $output, $result);
-        if ($last === false || $result !== 0) {
-            throw new CliException('Running git failed');
-        }
-
+        $output = $this->git('log', '--no-renames', '--pretty=format:', '--name-only', '--diff-filter=D');
         $output = array_map('trim', $output);
         $output = array_filter($output);
         $output = array_unique($output);
@@ -393,5 +393,28 @@ class cli_plugin_dev extends CLIPlugin
         file_put_contents('deleted.files', $content);
         $this->success('written deleted.files');
         return 0;
+    }
+
+    /**
+     * Run git with the given arguments and return the output
+     *
+     * @throws CliException when the command can't be run
+     * @param string ...$args
+     * @return string[]
+     */
+    protected function git(...$args)
+    {
+        $args = array_map('escapeshellarg', $args);
+        $cmd = 'git ' . join(' ', $args);
+        $output = [];
+        $result = 0;
+
+        $this->info($cmd);
+        $last = exec($cmd, $output, $result);
+        if ($last === false || $result !== 0) {
+            throw new CliException('Running git failed');
+        }
+
+        return $output;
     }
 }
