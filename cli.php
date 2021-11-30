@@ -65,9 +65,13 @@ class cli_plugin_dev extends CLIPlugin
             'Colon-prefixed name of the icon. Available prefixes: ' . join(', ', $prefixes), true, 'downloadSvg');
         $options->registerArgument('output', 'File to save, defaults to <name>.svg in current dir', false,
             'downloadSvg');
+        $options->registerOption('keep-ns', 'Keep the SVG namespace. Use when the file is not inlined into HTML.', 'k',
+            false, 'downloadSvg');
 
         $options->registerCommand('cleanSvg', 'Clean an existing SVG file to reduce file size.');
         $options->registerArgument('file', 'The file to clean (will be overwritten)', true, 'cleanSvg');
+        $options->registerOption('keep-ns', 'Keep the SVG namespace. Use when the file is not inlined into HTML.', 'k',
+            false, 'cleanSvg');
     }
 
     /** @inheritDoc */
@@ -96,10 +100,12 @@ class cli_plugin_dev extends CLIPlugin
             case 'downloadSvg':
                 $ident = array_shift($args);
                 $save = array_shift($args);
-                return $this->cmdDownloadSVG($ident, $save);
+                $keep = $options->getOpt('keep-ns', false);
+                return $this->cmdDownloadSVG($ident, $save, $keep);
             case 'cleanSvg':
                 $file = array_shift($args);
-                return $this->cmdCleanSVG($file);
+                $keep = $options->getOpt('keep-ns', false);
+                return $this->cmdCleanSVG($file, $keep);
             default:
                 $this->error('Unknown command');
                 echo $options->help();
@@ -487,23 +493,27 @@ class cli_plugin_dev extends CLIPlugin
      *
      * @param string $ident
      * @param string $save
+     * @param bool $keep
      * @return int
      * @throws Exception
      */
-    protected function cmdDownloadSVG($ident, $save = '')
+    protected function cmdDownloadSVG($ident, $save = '', $keep = false)
     {
         $svg = new SVGIcon($this);
+        $svg->keepNamespace($keep);
         return (int)$svg->downloadRemoteIcon($ident, $save);
     }
 
     /**
      * @param string $file
+     * @param bool $keep
      * @return int
      * @throws Exception
      */
-    protected function cmdCleanSVG($file)
+    protected function cmdCleanSVG($file, $keep = false)
     {
         $svg = new SVGIcon($this);
+        $svg->keepNamespace($keep);
         return (int)$svg->cleanSVGFile($file);
     }
 

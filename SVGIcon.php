@@ -19,7 +19,11 @@ class SVGIcon
         'twbs' => "https://raw.githubusercontent.com/twbs/icons/main/icons/%s.svg",
     ];
 
+    /** @var CLI for logging */
     protected $logger;
+
+    /** @var bool keep the SVG namespace for when the image is not used in embed? */
+    protected $keepns = false;
 
     /**
      * @throws \Exception
@@ -27,6 +31,16 @@ class SVGIcon
     public function __construct(CLI $logger)
     {
         $this->logger = $logger;
+    }
+
+    /**
+     * Call before cleaning to keep the SVG namespace
+     *
+     * @param bool $keep
+     */
+    public function keepNamespace($keep = true)
+    {
+        $this->keepns = $keep;
     }
 
     /**
@@ -102,7 +116,7 @@ class SVGIcon
     }
 
     /**
-     * Minify SVG for embedding
+     * Minify SVG
      *
      * @param string $svgdata
      * @return string
@@ -160,6 +174,11 @@ class SVGIcon
         $xpath = new \DOMXPath($dom);
         for ($els = $xpath->query('//comment()'), $i = $els->length - 1; $i >= 0; $i--) {
             $els->item($i)->parentNode->removeChild($els->item($i));
+        }
+
+        // readd namespace if not meant for embedding
+        if ($this->keepns) {
+            $svg->setAttribute('xmlns', 'http://www.w3.org/2000/svg');
         }
 
         $svgdata = $dom->saveXML($svg);
