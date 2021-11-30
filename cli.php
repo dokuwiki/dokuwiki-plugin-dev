@@ -3,6 +3,7 @@
 
 use dokuwiki\Extension\CLIPlugin;
 use dokuwiki\Extension\PluginController;
+use dokuwiki\plugin\dev\SVGIcon;
 use splitbrain\phpcli\Exception as CliException;
 use splitbrain\phpcli\Options;
 
@@ -50,16 +51,34 @@ class cli_plugin_dev extends CLIPlugin
 
         $options->registerCommand('deletedFiles', 'Create the list of deleted files based on the git history.');
         $options->registerCommand('rmObsolete', 'Delete obsolete files.');
+
+        $prefixes = array_keys(SVGIcon::SOURCES);
+        array_walk(
+            $prefixes,
+            function (&$item) {
+                $item = $this->colors->wrap($item, $this->colors::C_BROWN);
+            }
+        );
+
+        $options->registerCommand('downloadSvg', 'Download an SVG file from a known icon repository.');
+        $options->registerArgument('prefix:name',
+            'Colon-prefixed name of the icon. Available prefixes: ' . join(', ', $prefixes), true, 'downloadSvg');
+        $options->registerArgument('output', 'File to save, defaults to <name>.svg in current dir', false,
+            'downloadSvg');
+
+        $options->registerCommand('cleanSvg', 'Clean an existing SVG file to reduce file size.');
+        $options->registerArgument('file', 'The file to clean (will be overwritten)', true, 'cleanSvg');
     }
 
     /** @inheritDoc */
     protected function main(Options $options)
     {
+        $args = $options->getArgs();
+
         switch ($options->getCmd()) {
             case 'init':
                 return $this->cmdInit();
             case 'addTest':
-                $args = $options->getArgs();
                 $test = array_shift($args);
                 return $this->cmdAddTest($test);
             case 'addConf':
@@ -67,15 +86,22 @@ class cli_plugin_dev extends CLIPlugin
             case 'addLang':
                 return $this->cmdAddLang();
             case 'addComponent':
-                $args = $options->getArgs();
                 $type = array_shift($args);
                 $component = array_shift($args);
                 return $this->cmdAddComponent($type, $component);
             case 'deletedFiles':
                 return $this->cmdDeletedFiles();
             case 'rmObsolete':
-                return $this->rmObsolete();
+                return $this->cmdRmObsolete();
+            case 'downloadSvg':
+                $ident = array_shift($args);
+                $save = array_shift($args);
+                return $this->cmdDownloadSVG($ident, $save);
+            case 'cleanSvg':
+                $file = array_shift($args);
+                return $this->cmdCleanSVG($file);
             default:
+                $this->error('Unknown command');
                 echo $options->help();
                 return 0;
         }
@@ -448,12 +474,37 @@ class cli_plugin_dev extends CLIPlugin
     /**
      * Remove files that shouldn't be here anymore
      */
-    protected function rmObsolete()
+    protected function cmdRmObsolete()
     {
         $this->deleteFile('_test/general.test.php');
         $this->deleteFile('.travis.yml');
 
         return 0;
+    }
+
+    /**
+     * Download a remote icon
+     *
+     * @param string $ident
+     * @param string $save
+     * @return int
+     * @throws Exception
+     */
+    protected function cmdDownloadSVG($ident, $save = '')
+    {
+        $svg = new SVGIcon($this);
+        return (int)$svg->downloadRemoteIcon($ident, $save);
+    }
+
+    /**
+     * @param string $file
+     * @return int
+     * @throws Exception
+     */
+    protected function cmdCleanSVG($file)
+    {
+        $svg = new SVGIcon($this);
+        return (int)$svg->cleanSVGFile($file);
     }
 
     //endregion
