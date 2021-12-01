@@ -68,8 +68,8 @@ class cli_plugin_dev extends CLIPlugin
         $options->registerOption('keep-ns', 'Keep the SVG namespace. Use when the file is not inlined into HTML.', 'k',
             false, 'downloadSvg');
 
-        $options->registerCommand('cleanSvg', 'Clean an existing SVG file to reduce file size.');
-        $options->registerArgument('file', 'The file to clean (will be overwritten)', true, 'cleanSvg');
+        $options->registerCommand('cleanSvg', 'Clean a existing SVG files to reduce their file size.');
+        $options->registerArgument('files...', 'The files to clean (will be overwritten)', true, 'cleanSvg');
         $options->registerOption('keep-ns', 'Keep the SVG namespace. Use when the file is not inlined into HTML.', 'k',
             false, 'cleanSvg');
     }
@@ -103,9 +103,8 @@ class cli_plugin_dev extends CLIPlugin
                 $keep = $options->getOpt('keep-ns', false);
                 return $this->cmdDownloadSVG($ident, $save, $keep);
             case 'cleanSvg':
-                $file = array_shift($args);
                 $keep = $options->getOpt('keep-ns', false);
-                return $this->cmdCleanSVG($file, $keep);
+                return $this->cmdCleanSVG($args, $keep);
             default:
                 $this->error('Unknown command');
                 echo $options->help();
@@ -505,16 +504,21 @@ class cli_plugin_dev extends CLIPlugin
     }
 
     /**
-     * @param string $file
+     * @param string[] $files
      * @param bool $keep
      * @return int
      * @throws Exception
      */
-    protected function cmdCleanSVG($file, $keep = false)
+    protected function cmdCleanSVG($files, $keep = false)
     {
         $svg = new SVGIcon($this);
         $svg->keepNamespace($keep);
-        return (int)$svg->cleanSVGFile($file);
+
+        $ok = true;
+        foreach ($files as $file) {
+            $ok = $ok && $svg->cleanSVGFile($file);
+        }
+        return (int) $ok;
     }
 
     //endregion
