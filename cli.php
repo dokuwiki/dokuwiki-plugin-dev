@@ -3,6 +3,7 @@
 
 use dokuwiki\Extension\CLIPlugin;
 use dokuwiki\Extension\PluginController;
+use dokuwiki\plugin\dev\LangProcessor;
 use dokuwiki\plugin\dev\SVGIcon;
 use splitbrain\phpcli\Exception as CliException;
 use splitbrain\phpcli\Options;
@@ -13,7 +14,6 @@ use splitbrain\phpcli\Options;
  */
 class cli_plugin_dev extends CLIPlugin
 {
-
     /**
      * Register options and arguments on the given $options object
      *
@@ -72,6 +72,10 @@ class cli_plugin_dev extends CLIPlugin
         $options->registerArgument('files...', 'The files to clean (will be overwritten)', true, 'cleanSvg');
         $options->registerOption('keep-ns', 'Keep the SVG namespace. Use when the file is not inlined into HTML.', 'k',
             false, 'cleanSvg');
+
+        $options->registerCommand('cleanLang',
+            'Clean language files from unused language strings. Detecting which strings are truly in use may '.
+            'not always correctly work. Use with caution.');
     }
 
     /** @inheritDoc */
@@ -105,6 +109,8 @@ class cli_plugin_dev extends CLIPlugin
             case 'cleanSvg':
                 $keep = $options->getOpt('keep-ns', false);
                 return $this->cmdCleanSVG($args, $keep);
+            case 'cleanLang':
+                return $this->cmdCleanLang();
             default:
                 $this->error('Unknown command');
                 echo $options->help();
@@ -518,7 +524,22 @@ class cli_plugin_dev extends CLIPlugin
         foreach ($files as $file) {
             $ok = $ok && $svg->cleanSVGFile($file);
         }
-        return (int) $ok;
+        return (int)$ok;
+    }
+
+    /**
+     * @return int
+     */
+    protected function cmdCleanLang()
+    {
+        $lp = new LangProcessor($this);
+
+        $files = glob('./lang/*/lang.php');
+        foreach ($files as $file) {
+            $lp->processLangFile($file);
+        }
+
+        return 0;
     }
 
     //endregion
