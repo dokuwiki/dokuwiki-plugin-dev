@@ -11,12 +11,16 @@ class LangProcessor
     protected $logger;
 
     /** @var array The language keys used in the code */
-    protected $found;
+    protected $codeKeys;
+
+    /** @var array The language keys matching the configuration settings */
+    protected $settingKeys;
 
     public function __construct(CLI $logger)
     {
         $this->logger = $logger;
-        $this->found = $this->findLanguageKeysInCode();
+        $this->codeKeys = $this->findLanguageKeysInCode();
+        $this->settingKeys = $this->findLanguageKeysInSettings();
     }
 
     /**
@@ -30,7 +34,7 @@ class LangProcessor
         $lang = [];
         include $file;
 
-        $drop = array_diff_key($lang, $this->found);
+        $drop = array_diff_key($lang, $this->codeKeys);
         if (isset($found['js']) && isset($lang['js'])) {
             $drop['js'] = array_diff_key($lang['js'], $found['js']);
             if (!count($drop['js'])) unset($drop['js']);
@@ -44,6 +48,23 @@ class LangProcessor
             } else {
                 $this->removeLangKey($file, $key);
             }
+        }
+    }
+
+    /**
+     * Remove obsolete string from the given settings.php
+     * 
+     * @param string $file
+     * @return void
+     */
+    public function processSettingsFile($file)
+    {
+        $lang = [];
+        include $file;
+
+        $drop = array_diff_key($lang, $this->settingKeys);
+        foreach ($drop as $key => $value) {
+            $this->removeLangKey($file, $key);
         }
     }
 
@@ -74,7 +95,19 @@ class LangProcessor
     }
 
     /**
+     * @return array
+     */
+    public function findLanguageKeysInSettings()
+    {
+        if (file_exists('./conf/metadata.php')) {
+            return $this->metaExtract('./conf/metadata.php');
+        }
+        return [];
+    }
+
+    /**
      * Find used language keys in the actual code
+     * @return array
      */
     public function findLanguageKeysInCode()
     {
@@ -102,6 +135,25 @@ class LangProcessor
             } elseif ($file->getExtension() == 'js') {
                 if (!isset($found['js'])) $found['js'] = [];
                 $found['js'] = array_merge($found['js'], $this->jsExtract($path));
+            }
+        }
+
+        return $found;
+    }
+
+    public function metaExtract($file)
+    {
+        $meta = [];
+        include $file;
+
+        $found = [];
+        foreach ($meta as $key => $info) {
+            $found[$key] = $file;
+
+            if (isset($info['_choices'])) {
+                foreach ($info['_choices'] as $choice) {
+                    $found[$key . '_o_' . $choice] = $file;
+                }
             }
         }
 

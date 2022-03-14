@@ -74,7 +74,7 @@ class cli_plugin_dev extends CLIPlugin
             false, 'cleanSvg');
 
         $options->registerCommand('cleanLang',
-            'Clean language files from unused language strings. Detecting which strings are truly in use may '.
+            'Clean language files from unused language strings. Detecting which strings are truly in use may ' .
             'not always correctly work. Use with caution.');
     }
 
@@ -535,6 +535,11 @@ class cli_plugin_dev extends CLIPlugin
         $lp = new LangProcessor($this);
 
         $files = glob('./lang/*/lang.php');
+        foreach ($files as $file) {
+            $lp->processLangFile($file);
+        }
+
+        $files = glob('./lang/*/settings.php');
         foreach ($files as $file) {
             $lp->processLangFile($file);
         }
