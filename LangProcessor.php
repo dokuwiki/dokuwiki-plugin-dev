@@ -53,7 +53,7 @@ class LangProcessor
 
     /**
      * Remove obsolete string from the given settings.php
-     * 
+     *
      * @param string $file
      * @return void
      */
@@ -138,9 +138,23 @@ class LangProcessor
             }
         }
 
+        // admin menu entry
+        if (is_dir('admin')) {
+            $found['menu'] = 'admin/';
+        }
+        if (file_exists('admin.php')) {
+            $found['menu'] = 'admin.php';
+        }
+
         return $found;
     }
 
+    /**
+     * Extract language keys from given settings file
+     *
+     * @param string $file
+     * @return array
+     */
     public function metaExtract($file)
     {
         $meta = [];
