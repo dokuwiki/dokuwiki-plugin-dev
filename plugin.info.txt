@@ -1,7 +1,7 @@
 base   dev
 author Andreas Gohr
 email  andi@splitbrain.org
-date   2022-03-14
+date   2022-03-15
 name   dev plugin
 desc   The DokuWiki Developer's tool
 url    https://www.dokuwiki.org/plugin:dev
