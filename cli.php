@@ -541,7 +541,7 @@ class cli_plugin_dev extends CLIPlugin
 
         $files = glob('./lang/*/settings.php');
         foreach ($files as $file) {
-            $lp->processLangFile($file);
+            $lp->processSettingsFile($file);
         }
 
         return 0;
