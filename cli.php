@@ -434,11 +434,11 @@ class cli_plugin_dev extends CLIPlugin
         if ($component) {
             $path = $type . '/' . $component . '.php';
             $class = $type . '_plugin_' . $plugin . '_' . $component;
-            $self = $plugin . '_' . $component;
+            $self = 'plugin_'.$plugin . '_' . $component;
         } else {
             $path = $type . '.php';
             $class = $type . '_plugin_' . $plugin;
-            $self = $plugin;
+            $self = 'plugin_'.$plugin;
         }
 
         $replacements = $this->actionReplacements();
