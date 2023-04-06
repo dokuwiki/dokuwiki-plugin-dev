@@ -1,0 +1,7 @@
+base   @@PLUGIN_NAME@@
+author @@AUTHOR_NAME@@
+email  @@AUTHOR_MAIL@@
+date   @@DATE@@
+name   @@PLUGIN_NAME@@ @@PLUGIN_TYPE@@
+desc   @@PLUGIN_DESC@@
+url    @@PLUGIN_URL@@

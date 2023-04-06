@@ -4,6 +4,7 @@
 use dokuwiki\Extension\CLIPlugin;
 use dokuwiki\Extension\PluginController;
 use dokuwiki\plugin\dev\LangProcessor;
+use dokuwiki\plugin\dev\Skeletor;
 use dokuwiki\plugin\dev\SVGIcon;
 use splitbrain\phpcli\Exception as CliException;
 use splitbrain\phpcli\Options;
@@ -104,10 +105,10 @@ class cli_plugin_dev extends CLIPlugin
             case 'downloadSvg':
                 $ident = array_shift($args);
                 $save = array_shift($args);
-                $keep = $options->getOpt('keep-ns', false);
+                $keep = $options->getOpt('keep-ns');
                 return $this->cmdDownloadSVG($ident, $save, $keep);
             case 'cleanSvg':
-                $keep = $options->getOpt('keep-ns', false);
+                $keep = $options->getOpt('keep-ns');
                 return $this->cmdCleanSVG($args, $keep);
             case 'cleanLang':
                 return $this->cmdCleanLang();
@@ -185,104 +186,23 @@ class cli_plugin_dev extends CLIPlugin
     }
 
     /**
-     * Download a skeleton file and do the replacements
+     * Create the given files with their given content
      *
-     * @param string $skel Skeleton relative to the skel dir in the repo
-     * @param string $target Target file relative to the main directory
-     * @param array $replacements
+     * Ignores all files that already exist
+     *
+     * @param array $files A File array as created by Skeletor::getFiles()
      */
-    protected function loadSkeleton($skel, $target, $replacements)
-    {
-        if (file_exists($target)) {
-            $this->error($target . ' already exists');
-            return;
+    protected function createFiles($files) {
+        foreach ($files as $path => $content) {
+            if(file_exists($path)) {
+                $this->error($path . ' already exists');
+                continue;
+            }
+
+            io_makeFileDir($path);
+            file_put_contents($path, $content);
+            $this->success($path . ' created');
         }
-
-        $base = 'https://raw.githubusercontent.com/dokufreaks/dokuwiki-plugin-wizard/master/skel/';
-        $http = new \dokuwiki\HTTP\DokuHTTPClient();
-        $content = $http->get($base . $skel);
-
-        $content = str_replace(
-            array_keys($replacements),
-            array_values($replacements),
-            $content
-        );
-
-        io_makeFileDir($target);
-        file_put_contents($target, $content);
-        $this->success('Added ' . $target);
-    }
-
-    /**
-     * Prepare the string replacements
-     *
-     * @param array $replacements override defaults
-     * @return array
-     */
-    protected function prepareReplacements($replacements = [])
-    {
-        // defaults
-        $data = [
-            '@@AUTHOR_NAME@@' => '',
-            '@@AUTHOR_MAIL@@' => '',
-            '@@PLUGIN_NAME@@' => '',
-            '@@PLUGIN_DESC@@' => '',
-            '@@PLUGIN_URL@@' => '',
-            '@@PLUGIN_TYPE@@' => '',
-            '@@INSTALL_DIR@@' => 'plugins',
-            '@@DATE@@' => date('Y-m-d'),
-        ];
-
-        // load from existing plugin.info
-        $dir = fullpath(getcwd());
-        [$name, $type] = $this->getTypedNameFromDir($dir);
-        if (file_exists("$type.info.txt")) {
-            $info = confToHash("$type.info.txt");
-            $data['@@AUTHOR_NAME@@'] = $info['author'];
-            $data['@@AUTHOR_MAIL@@'] = $info['email'];
-            $data['@@PLUGIN_DESC@@'] = $info['desc'];
-            $data['@@PLUGIN_URL@@'] = $info['url'];
-        }
-        $data['@@PLUGIN_NAME@@'] = $name;
-        $data['@@PLUGIN_TYPE@@'] = $type;
-
-        if ($type == 'template') {
-            $data['@@INSTALL_DIR@@'] = 'tpl';
-        }
-
-        // merge given overrides
-        $data = array_merge($data, $replacements);
-
-        // set inherited defaults
-        if (empty($data['@@PLUGIN_URL@@'])) {
-            $data['@@PLUGIN_URL@@'] =
-                'https://www.dokuwiki.org/' .
-                $data['@@PLUGIN_TYPE@@'] . ':' .
-                $data['@@PLUGIN_NAME@@'];
-        }
-
-        return $data;
-    }
-
-    /**
-     * Replacements needed for action components.
-     *
-     * Not cool but that' what we need currently
-     *
-     * @return string[]
-     */
-    protected function actionReplacements()
-    {
-        $fn = 'handleEventName';
-        $register = '        $controller->register_hook(\'EVENT_NAME\', \'AFTER|BEFORE\', $this, \'' . $fn . '\');';
-        $handler = '    public function ' . $fn . '(Doku_Event $event, $param)' . "\n"
-            . "    {\n"
-            . "    }\n";
-
-        return [
-            '@@REGISTER@@' => $register . "\n   ",
-            '@@HANDLERS@@' => $handler,
-        ];
     }
 
     /**
@@ -335,23 +255,14 @@ class cli_plugin_dev extends CLIPlugin
             throw new CliException('Current directory needs to be empty');
         }
 
-        [$name, $type] = $this->getTypedNameFromDir($dir);
+        [$base, $type] = $this->getTypedNameFromDir($dir);
         $user = $this->readLine('Your Name', true);
         $mail = $this->readLine('Your E-Mail', true);
         $desc = $this->readLine('Short description');
 
-        $replacements = [
-            '@@AUTHOR_NAME@@' => $user,
-            '@@AUTHOR_MAIL@@' => $mail,
-            '@@PLUGIN_NAME@@' => $name,
-            '@@PLUGIN_DESC@@' => $desc,
-            '@@PLUGIN_TYPE@@' => $type,
-        ];
-        $replacements = $this->prepareReplacements($replacements);
-
-        $this->loadSkeleton('info.skel', $type . '.info.txt', $replacements);
-        $this->loadSkeleton('README.skel', 'README', $replacements); // fixme needs to be type specific
-        $this->loadSkeleton('LICENSE.skel', 'LICENSE', $replacements);
+        $skeletor = new Skeletor($type, $base, $desc, $user, $mail);
+        $skeletor->addBasics();
+        $this->createFiles($skeletor->getFiles());
 
         try {
             $this->git('init');
@@ -370,16 +281,9 @@ class cli_plugin_dev extends CLIPlugin
      */
     protected function cmdAddTest($test = '')
     {
-        $test = ucfirst(strtolower($test));
-
-        $replacements = $this->prepareReplacements(['@@TEST@@' => $test]);
-        $this->loadSkeleton('.github/workflows/phpTestLinux.skel', '.github/workflows/phpTestLinux.yml', $replacements);
-        if ($test) {
-            $this->loadSkeleton('_test/StandardTest.skel', '_test/' . $test . 'Test.php', $replacements);
-        } else {
-            $this->loadSkeleton('_test/GeneralTest.skel', '_test/GeneralTest.php', $replacements);
-        }
-
+        $skeletor = Skeletor::fromDir(getcwd());
+        $skeletor->addTest($test);
+        $this->createFiles($skeletor->getFiles());
         return 0;
     }
 
@@ -390,13 +294,9 @@ class cli_plugin_dev extends CLIPlugin
      */
     protected function cmdAddConf()
     {
-        $replacements = $this->prepareReplacements();
-        $this->loadSkeleton('conf/default.skel', 'conf/default.php', $replacements);
-        $this->loadSkeleton('conf/metadata.skel', 'conf/metadata.php', $replacements);
-        if (is_dir('lang')) {
-            $this->loadSkeleton('lang/settings.skel', 'lang/en/settings.php', $replacements);
-        }
-
+        $skeletor = Skeletor::fromDir(getcwd());
+        $skeletor->addConf(is_dir('lang'));
+        $this->createFiles($skeletor->getFiles());
         return 0;
     }
 
@@ -407,12 +307,9 @@ class cli_plugin_dev extends CLIPlugin
      */
     protected function cmdAddLang()
     {
-        $replacements = $this->prepareReplacements();
-        $this->loadSkeleton('lang/lang.skel', 'lang/en/lang.php', $replacements);
-        if (is_dir('conf')) {
-            $this->loadSkeleton('lang/settings.skel', 'lang/en/settings.php', $replacements);
-        }
-
+        $skeletor = Skeletor::fromDir(getcwd());
+        $skeletor->addLang(is_dir('conf'));
+        $this->createFiles($skeletor->getFiles());
         return 0;
     }
 
@@ -424,29 +321,9 @@ class cli_plugin_dev extends CLIPlugin
      */
     protected function cmdAddComponent($type, $component = '')
     {
-        $dir = fullpath(getcwd());
-        list($plugin, $extension) = $this->getTypedNameFromDir($dir);
-        if ($extension != 'plugin') throw  new CliException('Components can only be added to plugins');
-        if (!in_array($type, PluginController::PLUGIN_TYPES)) {
-            throw new CliException('Invalid type ' . $type);
-        }
-
-        if ($component) {
-            $path = $type . '/' . $component . '.php';
-            $class = $type . '_plugin_' . $plugin . '_' . $component;
-            $self = 'plugin_'.$plugin . '_' . $component;
-        } else {
-            $path = $type . '.php';
-            $class = $type . '_plugin_' . $plugin;
-            $self = 'plugin_'.$plugin;
-        }
-
-        $replacements = $this->actionReplacements();
-        $replacements['@@PLUGIN_COMPONENT_NAME@@'] = $class;
-        $replacements['@@SYNTAX_COMPONENT_NAME@@'] = $self;
-        $replacements = $this->prepareReplacements($replacements);
-        $this->loadSkeleton($type . '.skel', $path, $replacements);
-
+        $skeletor = Skeletor::fromDir(getcwd());
+        $skeletor->addComponent($type, $component);
+        $this->createFiles($skeletor->getFiles());
         return 0;
     }
 
