@@ -9,8 +9,16 @@ a:link, a:visited {
 
 main {
     width: 100%;
-    max-width: 75em;
+    max-width: 72em;
     margin: 0 auto;
+}
+
+.intro {
+    columns: 35em;
+}
+
+.intro p {
+    margin: 0 0 1em;
 }
 
 form section {

@@ -12,6 +12,27 @@ will not work!
 Please refer to http://www.dokuwiki.org/extensions for additional info
 on how to install extensions in DokuWiki.
 
+Plugin Wizard
+=============
+
+This repository serves a dual purpose. It's main purpose it to provide
+a plugin for DokuWiki that helps developers to create new plugins. It
+also provides the web interface known as the "DokuWiki Plugin Wizard"
+available at https://pluginwiz.dokuwiki.org/ - files for that are
+in the www subdirectory.
+
+Users of the plugin do not need to bother with the wizard parts (in
+fact they are not included in the download when the plugin is installed
+via the plugin manager).
+
+If you want to work on the wizard code, you need to install the
+dependencies using composer. This is needed because the wizard runs
+independent of a DokuWiki installation.
+
+Wizard and plugin only share the skeletons (in the skel directory)
+and the Skeletor class which implements the logic for using the
+skeletons.
+
 ----
 Copyright (C) Andreas Gohr <andi@splitbrain.org>
 

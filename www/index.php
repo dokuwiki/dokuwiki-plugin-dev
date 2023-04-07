@@ -36,7 +36,7 @@ header('Content-Type: text/html; charset=utf-8');
         <p>
             This wizard generates a <a href="https://www.dokuwiki.org/devel:plugins">DokuWiki plugin</a>
             skeleton to help you get started with coding your plugin.
-            Before using it you should familiarize your self with how plugins in DokuWiki work
+            Before using it, you should familiarize your self with how plugins in DokuWiki work
             and determine what components your plugin will need.
         </p>
 
