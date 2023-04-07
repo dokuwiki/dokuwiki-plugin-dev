@@ -55,7 +55,7 @@ function createComponentElement(plugin, type, name) {
     li.append(label);
 
 
-    // add auto completion for events
+    // add auto-completion for events
     if (type === 'action') {
         const events = document.createElement('input');
         events.type = 'text';
@@ -77,6 +77,24 @@ function createComponentElement(plugin, type, name) {
                 this.input.value = before + text + ", ";
             }
         });
+    }
+
+    // allow picking the renderer to extend
+    if(type === 'renderer') {
+        const renderers = document.createElement('select');
+        renderers.name = `options[${id}]`;
+
+        const opt1 = document.createElement('option');
+        opt1.value = 'Doku_Renderer_xhtml';
+        opt1.innerText = 'Extend Doku_Renderer_xhtml';
+
+        const opt2 = document.createElement('option');
+        opt2.value = 'Doku_Renderer';
+        opt2.innerText = 'Extend Doku_Renderer';
+
+        renderers.append(opt1);
+        renderers.append(opt2);
+        li.append(renderers);
     }
 
 

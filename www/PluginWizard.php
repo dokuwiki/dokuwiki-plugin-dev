@@ -18,9 +18,11 @@ class PluginWizard
     {
         if (!isset($_POST['base'])) return null;
 
+        $base = preg_replace('/[^a-z0-9]/i', '', $_POST['base']);
+
         $skeletor = new Skeletor(
             Skeletor::TYPE_PLUGIN,
-            $_POST['base'] ?: '',          //FIXME clean base
+            $base,
             $_POST['desc'] ?: '',
             $_POST['author'] ?: '',
             $_POST['mail'] ?: '',
@@ -48,7 +50,7 @@ class PluginWizard
         $zip->setCompression(9);
         $zip->create();
         foreach ($skeletor->getFiles() as $file => $content) {
-            $zip->addData($_POST['base'] . '/' . $file, $content);
+            $zip->addData($base . '/' . $file, $content);
         }
 
         return $zip->getArchive();

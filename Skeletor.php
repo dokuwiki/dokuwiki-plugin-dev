@@ -135,8 +135,11 @@ class Skeletor
             $self = 'plugin_' . $plugin;
         }
 
-        if($type === 'action') {
+        if ($type === 'action') {
             $replacements = $this->actionReplacements($options);
+        }
+        if ($type === 'renderer' && isset($options[0]) && $options[0] === 'Doku_Renderer_xhtml') {
+            $type = 'renderer_xhtml'; // different template then
         }
 
         $replacements['@@PLUGIN_COMPONENT_NAME@@'] = $class;
@@ -239,9 +242,9 @@ class Skeletor
             $fn = 'handle' . str_replace('_', '', ucwords(strtolower($event), '_'));
 
             $register .= '        $controller->register_hook(\'' . $event .
-                '\', \'AFTER|BEFORE\', $this, \'' . $fn . '\');'. "\n";
+                '\', \'AFTER|BEFORE\', $this, \'' . $fn . '\');' . "\n";
 
-            $handler .= str_replace(['@@EVENT@@','@@HANDLER@@'], [$event, $fn], $template);
+            $handler .= str_replace(['@@EVENT@@', '@@HANDLER@@'], [$event, $fn], $template);
         }
 
         return [

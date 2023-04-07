@@ -3,6 +3,10 @@ body, html {
     color: #333;
 }
 
+a:link, a:visited {
+    color: #33e;
+}
+
 main {
     width: 100%;
     max-width: 75em;
@@ -35,6 +39,10 @@ label > input[type="text"] {
 
 label > input[type="checkbox"] + span {
     font-weight: bold;
+}
+
+input, select {
+    padding: 0.2em;
 }
 
 button, label {

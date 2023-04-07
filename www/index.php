@@ -4,14 +4,14 @@ require __DIR__ . '/../vendor/autoload.php';
 $WIZ = new dokuwiki\plugin\dev\www\PluginWizard();
 try {
     $archive = $WIZ->handle();
-    if($archive) {
+    if ($archive) {
         header('Content-Type: application/zip');
         header('Content-Disposition: attachment; filename="plugin.zip"');
         echo $archive;
         exit;
     }
-} catch (Exception $e) {
-    // FIXME handle errors
+} catch (Exception $ignored) {
+    // errors should only happen when the frontend validation is ignored
 }
 
 header('Content-Type: text/html; charset=utf-8');
@@ -23,8 +23,9 @@ header('Content-Type: text/html; charset=utf-8');
         const ACTION_EVENTS = <?php echo json_encode($WIZ->getEvents()); ?>;
     </script>
 
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="awesomplete.css" /
+    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="awesomplete.css"
+    /
 </head>
 <body>
 <main>
