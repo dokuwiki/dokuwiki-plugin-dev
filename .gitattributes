@@ -1,0 +1,4 @@
+/.* export-ignore
+/_test export-ignore
+/composer.* export-ignore
+/www export-ignore

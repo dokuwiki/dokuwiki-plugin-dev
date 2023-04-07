@@ -14,13 +14,6 @@ class @@PLUGIN_COMPONENT_NAME@@ extends \dokuwiki\Extension\ActionPlugin
 @@REGISTER@@
     }
 
-    /**
-     * FIXME Event handler for
-     *
-     * @param Doku_Event $event  event object by reference
-     * @param mixed      $param  optional parameter passed when event was registered
-     * @return void
-     */
 @@HANDLERS@@
 }
 

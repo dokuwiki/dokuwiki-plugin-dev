@@ -1,0 +1,75 @@
+body, html {
+    font: 16px sans-serif;
+    color: #333;
+}
+
+main {
+    width: 100%;
+    max-width: 75em;
+    margin: 0 auto;
+}
+
+form section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2em;
+    justify-content: space-between;
+}
+
+label {
+    display: block;
+    margin-bottom: 1em;
+}
+
+label > span:first-child {
+    display: block;
+    font-weight: bold;
+}
+
+label > select,
+label > input[type="text"] {
+    width: 30em;
+    display: block;
+    font: 16px sans-serif;
+}
+
+label > input[type="checkbox"] + span {
+    font-weight: bold;
+}
+
+button, label {
+    cursor: pointer;
+}
+
+#output {
+    margin: 1em 0;
+    padding: 0;
+    list-style: none;
+}
+
+#output li {
+    margin: 1em 0;
+}
+
+#output li button {
+    float: right;
+}
+
+#output li span {
+    display: block;
+}
+
+#output li .awesomplete,
+#output li input,
+#output li select {
+    display: block;
+    width: 100%;
+}
+
+button[type="submit"] {
+    font-size: 120%;
+    width: 15em;
+    padding: 1em;
+    display: block;
+    margin: 1em auto;
+}

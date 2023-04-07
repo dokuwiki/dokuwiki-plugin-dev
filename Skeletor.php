@@ -113,7 +113,7 @@ class Skeletor
      * @param string $type
      * @param string $component
      */
-    public function addComponent($type, $component = '')
+    public function addComponent($type, $component = '', $options = [])
     {
         if ($this->type !== self::TYPE_PLUGIN) {
             throw new RuntimeException('Components can only be added to plugins');
@@ -135,7 +135,10 @@ class Skeletor
             $self = 'plugin_' . $plugin;
         }
 
-        $replacements = $this->actionReplacements('EVENT_NAME'); // FIXME accept multiple optional events
+        if($type === 'action') {
+            $replacements = $this->actionReplacements($options);
+        }
+
         $replacements['@@PLUGIN_COMPONENT_NAME@@'] = $class;
         $replacements['@@SYNTAX_COMPONENT_NAME@@'] = $self;
         $this->loadSkeleton($type . '.php', $path, $replacements);
@@ -219,20 +222,30 @@ class Skeletor
     /**
      * Replacements needed for action components.
      *
-     * @param string $event FIXME support multiple events
+     * @param string[] $event Event names to handle
      * @return string[]
      */
-    protected function actionReplacements($event)
+    protected function actionReplacements($events = [])
     {
-        $event = strtoupper($event);
-        $fn = 'handle' . str_replace('_', '', ucwords(strtolower($event), '_'));
-        $register = '        $controller->register_hook(\'' . $event . '\', \'AFTER|BEFORE\', $this, \'' . $fn . '\');';
-        $handler = '    public function ' . $fn . '(Doku_Event $event, $param)' . "\n"
-            . "    {\n"
-            . "    }\n";
+        if (!$events) $events = ['EXAMPLE_EVENT'];
+
+        $register = '';
+        $handler = '';
+
+        $template = file_get_contents(__DIR__ . '/skel/action_handler.php');
+
+        foreach ($events as $event) {
+            $event = strtoupper($event);
+            $fn = 'handle' . str_replace('_', '', ucwords(strtolower($event), '_'));
+
+            $register .= '        $controller->register_hook(\'' . $event .
+                '\', \'AFTER|BEFORE\', $this, \'' . $fn . '\');'. "\n";
+
+            $handler .= str_replace(['@@EVENT@@','@@HANDLER@@'], [$event, $fn], $template);
+        }
 
         return [
-            '@@REGISTER@@' => $register . "\n   ",
+            '@@REGISTER@@' => $register,
             '@@HANDLERS@@' => $handler,
         ];
     }

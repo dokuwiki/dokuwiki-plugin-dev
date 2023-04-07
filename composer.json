@@ -1,0 +1,20 @@
+{
+    "name": "dokuwiki/plugin-dev",
+    "description": "DokuWiki dev plugin and wizard",
+    "type": "project",
+    "license": "GPLv2",
+    "autoload": {
+        "psr-4": {
+            "dokuwiki\\plugin\\dev\\": "./"
+        }
+    },
+    "authors": [
+        {
+            "name": "Andreas Gohr",
+            "email": "andi@splitbrain.org"
+        }
+    ],
+    "require": {
+        "splitbrain/php-archive": "^1.3"
+    }
+}
