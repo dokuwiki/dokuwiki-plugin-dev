@@ -1,0 +1,34 @@
+name: "Update Info from DokuWiki"
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  update:
+    name: Update the event name list
+    runs-on: Ubuntu-latest
+    steps:
+      - name: Install pup
+        run: |
+            wget https://github.com/ericchiang/pup/releases/download/v0.4.0/pup_v0.4.0_linux_amd64.zip
+            unzip pup_v0.4.0_linux_amd64.zip
+            rm pup_v0.4.0_linux_amd64.zip
+            sudo mv pup /usr/local/bin
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Download Event Names
+        run: |
+            curl https://www.dokuwiki.org/devel:events_list |pup 'table.dataplugin_table td.title a text{}' > events.txt
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          commit-message: "Update event names"
+          title: "Update event names"
+          body: "This updates the list of action events supported by DokuWiki"
+          delete-branch: true
