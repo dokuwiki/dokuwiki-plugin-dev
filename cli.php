@@ -29,7 +29,7 @@ class cli_plugin_dev extends CLIPlugin
             "Run this script from within the extension's directory."
         );
 
-        $options->registerCommand('init', 'Initialize a new plugin or template in the current (empty) directory.');
+        $options->registerCommand('init', 'Initialize a new plugin or template in the current directory.');
         $options->registerCommand('addTest', 'Add the testing framework files and a test. (_test/)');
         $options->registerArgument('test', 'Optional name of the new test. Defaults to the general test.', false,
             'addTest');
@@ -192,9 +192,10 @@ class cli_plugin_dev extends CLIPlugin
      *
      * @param array $files A File array as created by Skeletor::getFiles()
      */
-    protected function createFiles($files) {
+    protected function createFiles($files)
+    {
         foreach ($files as $path => $content) {
-            if(file_exists($path)) {
+            if (file_exists($path)) {
                 $this->error($path . ' already exists');
                 continue;
             }
@@ -252,22 +253,25 @@ class cli_plugin_dev extends CLIPlugin
     {
         $dir = fullpath(getcwd());
         if ((new FilesystemIterator($dir))->valid()) {
-            throw new CliException('Current directory needs to be empty');
+            // existing directory, initialize from info file
+            $skeletor = Skeletor::fromDir($dir);
+        } else {
+            // new directory, ask for info
+            [$base, $type] = $this->getTypedNameFromDir($dir);
+            $user = $this->readLine('Your Name', true);
+            $mail = $this->readLine('Your E-Mail', true);
+            $desc = $this->readLine('Short description');
+            $skeletor = new Skeletor($type, $base, $desc, $user, $mail);
         }
-
-        [$base, $type] = $this->getTypedNameFromDir($dir);
-        $user = $this->readLine('Your Name', true);
-        $mail = $this->readLine('Your E-Mail', true);
-        $desc = $this->readLine('Short description');
-
-        $skeletor = new Skeletor($type, $base, $desc, $user, $mail);
         $skeletor->addBasics();
         $this->createFiles($skeletor->getFiles());
 
-        try {
-            $this->git('init');
-        } catch (CliException $e) {
-            $this->error($e->getMessage());
+        if (!is_dir("$dir/.git")) {
+            try {
+                $this->git('init');
+            } catch (CliException $e) {
+                $this->error($e->getMessage());
+            }
         }
 
         return 0;
