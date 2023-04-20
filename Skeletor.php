@@ -77,7 +77,7 @@ class Skeletor
 
         $data = file($dir . '/' . $type . '.info.txt', FILE_IGNORE_NEW_LINES);
         $data = array_map(function ($item) {
-            return array_map('trim', explode(' ', $item, 2));
+            return array_map('trim', sexplode(' ', $item, 2, ''));
         }, $data);
         $data = array_combine(array_column($data, 0), array_column($data, 1));
 
