@@ -104,7 +104,7 @@ class Skeletor
         $this->loadSkeleton('info.txt', $this->type . '.info.txt');
         $this->loadSkeleton('README');
         $this->loadSkeleton('LICENSE');
-        $this->loadSkeleton('.gitattributes');
+        $this->loadSkeleton('_gitattributes', '.gitattributes');
     }
 
     /**
