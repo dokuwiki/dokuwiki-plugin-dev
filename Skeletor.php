@@ -154,8 +154,16 @@ class Skeletor
      */
     public function addTest($test = '')
     {
-        $test = ucfirst(strtolower($test));
-        $this->loadSkeleton('.github/workflows/phpTestLinux.yml');
+        // pick a random day and time for the cron job
+        $cron = sprintf(
+            '%d %d %d * *',
+            random_int(0, 59),
+            random_int(0, 23),
+            random_int(1, 28)
+        );
+
+        $test = ucfirst($test);
+        $this->loadSkeleton('.github/workflows/dokuwiki.yml', '', ['@@CRON@@' => $cron]);
         if ($test) {
             $replacements = ['@@TEST@@' => $test];
             $this->loadSkeleton('_test/StandardTest.php', '_test/' . $test . 'Test.php', $replacements);

@@ -370,6 +370,7 @@ class cli_plugin_dev extends CLIPlugin
     {
         $this->deleteFile('_test/general.test.php');
         $this->deleteFile('.travis.yml');
+        $this->deleteFile('.github/workflows/phpTestLinux.yml');
 
         return 0;
     }
