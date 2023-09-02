@@ -105,8 +105,9 @@ header('Content-Type: text/html; charset=utf-8');
                 </label>
 
                 <label>
-                    <input type="checkbox" name="use_tests" value="1"/>
+                    <input type="checkbox" name="use_tests" value="1" checked="checked" disabled="disabled"/>
                     <span>Use unit tests</span>
+                    <small>(now always enabled)</small>
                 </label>
             </div>
 
