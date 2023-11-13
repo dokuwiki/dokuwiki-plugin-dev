@@ -9,7 +9,6 @@ use splitbrain\PHPArchive\Zip;
 
 class PluginWizard
 {
-
     /**
      * @throws ArchiveIllegalCompressionException
      * @throws ArchiveIOException
@@ -36,7 +35,7 @@ class PluginWizard
         if (!empty($_POST['use_test'])) $skeletor->addTest();
 
         foreach ($_POST['components'] as $id) {
-            list($type, /*"plugin"*/, /*base*/, $component) = array_pad(explode('_', $id, 4), 4, '');
+            [$type, , , $component] = array_pad(explode('_', $id, 4), 4, '');
             if (isset($_POST['options'][$id])) {
                 $options = array_filter(array_map('trim', explode(',', $_POST['options'][$id])));
             } else {
@@ -69,10 +68,4 @@ class PluginWizard
     {
         return array_map('trim', file(__DIR__ . '/../events.txt', FILE_IGNORE_NEW_LINES));
     }
-
 }
-
-
-
-
-

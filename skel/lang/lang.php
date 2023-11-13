@@ -1,4 +1,5 @@
 <?php
+
 /**
  * English language file for @@PLUGIN_NAME@@ plugin
  *
@@ -10,4 +11,3 @@
 
 // custom language strings for the plugin
 // $lang['fixme'] = 'FIXME';
-

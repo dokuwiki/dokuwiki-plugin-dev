@@ -10,7 +10,6 @@ use splitbrain\phpcli\Options;
  */
 class @@PLUGIN_COMPONENT_NAME@@ extends \dokuwiki\Extension\CLIPlugin
 {
-
     /** @inheritDoc */
     protected function setup(Options $options)
     {
@@ -33,6 +32,4 @@ class @@PLUGIN_COMPONENT_NAME@@ extends \dokuwiki\Extension\CLIPlugin
         // $command = $options->getCmd()
         // $arguments = $options->getArgs()
     }
-
 }
-

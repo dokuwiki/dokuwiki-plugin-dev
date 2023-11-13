@@ -10,8 +10,7 @@ use splitbrain\phpcli\CLI;
  */
 class SVGIcon
 {
-
-    const SOURCES = [
+    public const SOURCES = [
         'mdi' => "https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/%s.svg",
         'fab' => "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/brands/%s.svg",
         'fas' => "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/%s.svg",
@@ -97,7 +96,7 @@ class SVGIcon
     public function remoteIcon($ident)
     {
         if (strpos($ident, ':')) {
-            list($prefix, $name) = explode(':', $ident);
+            [$prefix, $name] = explode(':', $ident);
         } else {
             $prefix = 'mdi';
             $name = $ident;
@@ -130,6 +129,7 @@ class SVGIcon
 
         $dom = new \DOMDocument();
         $dom->loadXML($svgdata, LIBXML_NOBLANKS);
+
         $dom->formatOutput = false;
         $dom->preserveWhiteSpace = false;
 
@@ -225,5 +225,4 @@ class SVGIcon
 
         return $svg;
     }
-
 }
