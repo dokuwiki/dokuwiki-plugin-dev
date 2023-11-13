@@ -77,6 +77,14 @@ class cli_plugin_dev extends CLIPlugin
         $options->registerCommand('cleanLang',
             'Clean language files from unused language strings. Detecting which strings are truly in use may ' .
             'not always correctly work. Use with caution.');
+
+        $options->registerCommand('test', 'Run the unit tests for this extension.');
+
+        $options->registerCommand('check', 'Check for code style violations.');
+        $options->registerArgument('files...', 'The files to check. Defaults to the whole extension.', false, 'check');
+
+        $options->registerCommand('fix', 'Fix code style violations and refactor outdated code.');
+        $options->registerArgument('files...', 'The files to check. Defaults to the whole extension.', false, 'fix');
     }
 
     /** @inheritDoc */
@@ -112,6 +120,12 @@ class cli_plugin_dev extends CLIPlugin
                 return $this->cmdCleanSVG($args, $keep);
             case 'cleanLang':
                 return $this->cmdCleanLang();
+            case 'test':
+                return $this->cmdTest();
+            case 'check':
+                return $this->cmdCheck($args);
+            case 'fix':
+                return $this->cmdFix();
             default:
                 $this->error('Unknown command');
                 echo $options->help();
@@ -427,6 +441,114 @@ class cli_plugin_dev extends CLIPlugin
         }
 
         return 0;
+    }
+
+    /**
+     * @return int
+     */
+    protected function cmdTest()
+    {
+        $dir = fullpath(getcwd());
+        [$base, $type] = $this->getTypedNameFromDir($dir);
+
+        if ($this->colors->isEnabled()) {
+            $colors = 'always';
+        } else {
+            $colors = 'never';
+        }
+
+        $args = [
+            fullpath(__DIR__ . '/../../../_test/vendor/bin/phpunit'),
+            '--verbose',
+            "--colors=$colors",
+            '--configuration', fullpath(__DIR__ . '/../../../_test/phpunit.xml'),
+            '--group', $type . '_' . $base,
+        ];
+        $cmd = join(' ', array_map('escapeshellarg', $args));
+        $this->info("Running $cmd");
+
+        $result = 0;
+        passthru($cmd, $result);
+        return $result;
+    }
+
+    /**
+     * @return int
+     */
+    protected function cmdCheck($files = [])
+    {
+        $dir = fullpath(getcwd());
+
+        $args = [
+            fullpath(__DIR__ . '/../../../_test/vendor/bin/phpcs'),
+            '--standard=' . fullpath(__DIR__ . '/../../../_test/phpcs.xml'),
+            ($this->colors->isEnabled()) ? '--colors' : '--no-colors',
+            '--',
+        ];
+
+        if ($files) {
+            $args = array_merge($args, $files);
+        } else {
+            $args[] = fullpath($dir);
+        }
+
+        $cmd = join(' ', array_map('escapeshellarg', $args));
+        $this->info("Running $cmd");
+
+        $result = 0;
+        passthru($cmd, $result);
+        return $result;
+    }
+
+    /**
+     * @return int
+     */
+    protected function cmdFix($files = [])
+    {
+        $dir = fullpath(getcwd());
+
+        // first run rector to refactor outdated code
+        $args = [
+            fullpath(__DIR__ . '/../../../_test/vendor/bin/rector'),
+            ($this->colors->isEnabled()) ? '--ansi' : '--no-ansi',
+            '--config=' . fullpath(__DIR__ . '/../../../_test/rector.php'),
+            '--no-diffs',
+            'process',
+        ];
+
+        if ($files) {
+            $args = array_merge($args, $files);
+        } else {
+            $args[] = fullpath($dir);
+        }
+
+        $cmd = join(' ', array_map('escapeshellarg', $args));
+        $this->info("Running $cmd");
+
+        $result = 0;
+        passthru($cmd, $result);
+        if($result !== 0) return $result;
+
+        // now run phpcbf to clean up code style
+        $args = [
+            fullpath(__DIR__ . '/../../../_test/vendor/bin/phpcbf'),
+            '--standard=' . fullpath(__DIR__ . '/../../../_test/phpcs.xml'),
+            ($this->colors->isEnabled()) ? '--colors' : '--no-colors',
+            '--',
+        ];
+
+        if ($files) {
+            $args = array_merge($args, $files);
+        } else {
+            $args[] = fullpath($dir);
+        }
+
+        $cmd = join(' ', array_map('escapeshellarg', $args));
+        $this->info("Running $cmd");
+
+        $result = 0;
+        passthru($cmd, $result);
+        return $result;
     }
 
     //endregion
