@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Default settings for the @@PLUGIN_NAME@@ plugin
  *
@@ -6,4 +7,3 @@
  */
 
 //$conf['fixme']    = 'FIXME';
-

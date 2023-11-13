@@ -117,7 +117,7 @@ header('Content-Type: text/html; charset=utf-8');
                 <label>
                     <span>Type:</span>
                     <select>
-                        <?php foreach ($WIZ->getPluginTypes() as $type): ?>
+                        <?php foreach ($WIZ->getPluginTypes() as $type) : ?>
                             <option value="<?php echo $type ?>"><?php echo ucfirst($type) ?></option>
                         <?php endforeach; ?>
                     </select>

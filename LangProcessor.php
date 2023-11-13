@@ -6,7 +6,6 @@ use splitbrain\phpcli\CLI;
 
 class LangProcessor
 {
-
     /** @var CLI */
     protected $logger;
 
@@ -63,7 +62,7 @@ class LangProcessor
         include $file;
 
         $drop = array_diff_key($lang, $this->settingKeys);
-        foreach ($drop as $key => $value) {
+        foreach (array_keys($drop) as $key) {
             $this->removeLangKey($file, $key);
         }
     }
@@ -229,7 +228,6 @@ class LangProcessor
                 if (!isset($found[$key])) {
                     $found[$key] = $file . ':' . ($lno + 1);
                 }
-
             }
         }
 

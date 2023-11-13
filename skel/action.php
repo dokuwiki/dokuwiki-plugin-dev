@@ -15,8 +15,8 @@ class @@PLUGIN_COMPONENT_NAME@@ extends ActionPlugin
     /** @inheritDoc */
     public function register(EventHandler $controller)
     {
-@@REGISTER@@
+        @@REGISTER@@
     }
 
-@@HANDLERS@@
+    @@HANDLERS@@
 }

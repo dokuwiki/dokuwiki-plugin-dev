@@ -13,10 +13,10 @@ use RuntimeException;
 class Skeletor
 {
     // FIXME this may change upstream we may want to update it via github action
-    const PLUGIN_TYPES = ['auth', 'admin', 'syntax', 'action', 'renderer', 'helper', 'remote', 'cli'];
+    public const PLUGIN_TYPES = ['auth', 'admin', 'syntax', 'action', 'renderer', 'helper', 'remote', 'cli'];
 
-    const TYPE_PLUGIN = 'plugin';
-    const TYPE_TEMPLATE = 'template';
+    public const TYPE_PLUGIN = 'plugin';
+    public const TYPE_TEMPLATE = 'template';
 
     protected $type;
     protected $base;
@@ -65,7 +65,7 @@ class Skeletor
      * @param string $dir
      * @return Skeletor
      */
-    static public function fromDir($dir)
+    public static function fromDir($dir)
     {
         if (file_exists($dir . '/plugin.info.txt')) {
             $type = self::TYPE_PLUGIN;

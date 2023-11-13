@@ -31,8 +31,12 @@ class cli_plugin_dev extends CLIPlugin
 
         $options->registerCommand('init', 'Initialize a new plugin or template in the current directory.');
         $options->registerCommand('addTest', 'Add the testing framework files and a test. (_test/)');
-        $options->registerArgument('test', 'Optional name of the new test. Defaults to the general test.', false,
-            'addTest');
+        $options->registerArgument(
+            'test',
+            'Optional name of the new test. Defaults to the general test.',
+            false,
+            'addTest'
+        );
         $options->registerCommand('addConf', 'Add the configuration files. (conf/)');
         $options->registerCommand('addLang', 'Add the language files. (lang/)');
 
@@ -45,10 +49,18 @@ class cli_plugin_dev extends CLIPlugin
         );
 
         $options->registerCommand('addComponent', 'Add a new plugin component.');
-        $options->registerArgument('type', 'Type of the component. Needs to be one of ' . join(', ', $types), true,
-            'addComponent');
-        $options->registerArgument('name', 'Optional name of the component. Defaults to a base component.', false,
-            'addComponent');
+        $options->registerArgument(
+            'type',
+            'Type of the component. Needs to be one of ' . implode(', ', $types),
+            true,
+            'addComponent'
+        );
+        $options->registerArgument(
+            'name',
+            'Optional name of the component. Defaults to a base component.',
+            false,
+            'addComponent'
+        );
 
         $options->registerCommand('deletedFiles', 'Create the list of deleted files based on the git history.');
         $options->registerCommand('rmObsolete', 'Delete obsolete files.');
@@ -62,21 +74,41 @@ class cli_plugin_dev extends CLIPlugin
         );
 
         $options->registerCommand('downloadSvg', 'Download an SVG file from a known icon repository.');
-        $options->registerArgument('prefix:name',
-            'Colon-prefixed name of the icon. Available prefixes: ' . join(', ', $prefixes), true, 'downloadSvg');
-        $options->registerArgument('output', 'File to save, defaults to <name>.svg in current dir', false,
-            'downloadSvg');
-        $options->registerOption('keep-ns', 'Keep the SVG namespace. Use when the file is not inlined into HTML.', 'k',
-            false, 'downloadSvg');
+        $options->registerArgument(
+            'prefix:name',
+            'Colon-prefixed name of the icon. Available prefixes: ' . implode(', ', $prefixes),
+            true,
+            'downloadSvg'
+        );
+        $options->registerArgument(
+            'output',
+            'File to save, defaults to <name>.svg in current dir',
+            false,
+            'downloadSvg'
+        );
+        $options->registerOption(
+            'keep-ns',
+            'Keep the SVG namespace. Use when the file is not inlined into HTML.',
+            'k',
+            false,
+            'downloadSvg'
+        );
 
         $options->registerCommand('cleanSvg', 'Clean a existing SVG files to reduce their file size.');
         $options->registerArgument('files...', 'The files to clean (will be overwritten)', true, 'cleanSvg');
-        $options->registerOption('keep-ns', 'Keep the SVG namespace. Use when the file is not inlined into HTML.', 'k',
-            false, 'cleanSvg');
+        $options->registerOption(
+            'keep-ns',
+            'Keep the SVG namespace. Use when the file is not inlined into HTML.',
+            'k',
+            false,
+            'cleanSvg'
+        );
 
-        $options->registerCommand('cleanLang',
+        $options->registerCommand(
+            'cleanLang',
             'Clean language files from unused language strings. Detecting which strings are truly in use may ' .
-            'not always correctly work. Use with caution.');
+            'not always correctly work. Use with caution.'
+        );
 
         $options->registerCommand('test', 'Run the unit tests for this extension.');
 
@@ -243,7 +275,7 @@ class cli_plugin_dev extends CLIPlugin
     protected function git(...$args)
     {
         $args = array_map('escapeshellarg', $args);
-        $cmd = 'git ' . join(' ', $args);
+        $cmd = 'git ' . implode(' ', $args);
         $output = [];
         $result = 0;
 
@@ -363,14 +395,14 @@ class cli_plugin_dev extends CLIPlugin
         });
         sort($output);
 
-        if (!count($output)) {
+        if ($output === []) {
             $this->info('No deleted files found');
             return 0;
         }
 
         $content = "# This is a list of files that were present in previous releases\n" .
             "# but were removed later. They should not exist in your installation.\n" .
-            join("\n", $output) . "\n";
+            implode("\n", $output) . "\n";
 
         file_put_contents('deleted.files', $content);
         $this->success('written deleted.files');
@@ -464,7 +496,7 @@ class cli_plugin_dev extends CLIPlugin
             '--configuration', fullpath(__DIR__ . '/../../../_test/phpunit.xml'),
             '--group', $type . '_' . $base,
         ];
-        $cmd = join(' ', array_map('escapeshellarg', $args));
+        $cmd = implode(' ', array_map('escapeshellarg', $args));
         $this->info("Running $cmd");
 
         $result = 0;
@@ -492,7 +524,7 @@ class cli_plugin_dev extends CLIPlugin
             $args[] = fullpath($dir);
         }
 
-        $cmd = join(' ', array_map('escapeshellarg', $args));
+        $cmd = implode(' ', array_map('escapeshellarg', $args));
         $this->info("Running $cmd");
 
         $result = 0;
@@ -522,12 +554,12 @@ class cli_plugin_dev extends CLIPlugin
             $args[] = fullpath($dir);
         }
 
-        $cmd = join(' ', array_map('escapeshellarg', $args));
+        $cmd = implode(' ', array_map('escapeshellarg', $args));
         $this->info("Running $cmd");
 
         $result = 0;
         passthru($cmd, $result);
-        if($result !== 0) return $result;
+        if ($result !== 0) return $result;
 
         // now run phpcbf to clean up code style
         $args = [
@@ -543,7 +575,7 @@ class cli_plugin_dev extends CLIPlugin
             $args[] = fullpath($dir);
         }
 
-        $cmd = join(' ', array_map('escapeshellarg', $args));
+        $cmd = implode(' ', array_map('escapeshellarg', $args));
         $this->info("Running $cmd");
 
         $result = 0;
