@@ -12,7 +12,6 @@ use DokuWikiTest;
  */
 class GeneralTest extends DokuWikiTest
 {
-
     /**
      * Simple test to make sure the @@PLUGIN_TYPE@@.info.txt is in correct format
      */
@@ -81,6 +80,5 @@ class GeneralTest extends DokuWikiTest
                 );
             }
         }
-
     }
 }
