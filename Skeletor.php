@@ -256,8 +256,8 @@ class Skeletor
         }
 
         return [
-            '@@REGISTER@@' => $register,
-            '@@HANDLERS@@' => $handler,
+            '@@REGISTER@@' => rtrim($register, "\n"),
+            '@@HANDLERS@@' => rtrim($handler, "\n"),
         ];
     }
 

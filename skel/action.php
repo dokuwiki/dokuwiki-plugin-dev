@@ -17,6 +17,5 @@ class @@PLUGIN_COMPONENT_NAME@@ extends ActionPlugin
     {
 @@REGISTER@@
     }
-
 @@HANDLERS@@
 }
