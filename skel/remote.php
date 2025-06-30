@@ -4,7 +4,7 @@ use dokuwiki\Extension\RemotePlugin;
 use dokuwiki\Remote\AccessDeniedException;
 
 /**
- * DokuWiki Plugin @@PLUGIN_NAME@@ (Action Component)
+ * DokuWiki Plugin @@PLUGIN_NAME@@ (Remote Component)
  *
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author @@AUTHOR_NAME@@ <@@AUTHOR_MAIL@@>
