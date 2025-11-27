@@ -20,7 +20,7 @@ header('Content-Type: text/html; charset=utf-8');
 <head>
     <title>DokuWiki Plugin Wizard</title>
     <script type="text/javascript">
-        const ACTION_EVENTS = <?php echo json_encode($WIZ->getEvents()); ?>;
+        const ACTION_EVENTS = <?php echo json_encode($WIZ->getEvents(), JSON_THROW_ON_ERROR); ?>;
     </script>
 
     <link rel="stylesheet" href="style.css"/>
@@ -117,7 +117,7 @@ header('Content-Type: text/html; charset=utf-8');
                 <label>
                     <span>Type:</span>
                     <select>
-                        <?php foreach ($WIZ->getPluginTypes() as $type): ?>
+                        <?php foreach ($WIZ->getPluginTypes() as $type) : ?>
                             <option value="<?php echo $type ?>"><?php echo ucfirst($type) ?></option>
                         <?php endforeach; ?>
                     </select>
