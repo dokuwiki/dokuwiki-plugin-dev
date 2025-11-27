@@ -78,7 +78,18 @@ class cli_plugin_dev extends CLIPlugin
             'Clean language files from unused language strings. Detecting which strings are truly in use may ' .
             'not always correctly work. Use with caution.');
 
-        $options->registerCommand('test', 'Run the unit tests for this extension.');
+        $options->registerCommand(
+            'test',
+            'Run the unit tests for this extension. (calls phpunit using the proper config and group)'
+        );
+        $options->registerOption(
+            'filter',
+            'Filter tests to run by a given string. (passed to phpunit)',
+            null,
+            true,
+            'test'
+        );
+        $options->registerArgument('files...', 'The test files to run. Defaults to all.', false, 'test');
 
         $options->registerCommand('check', 'Check for code style violations.');
         $options->registerArgument('files...', 'The files to check. Defaults to the whole extension.', false, 'check');
@@ -121,7 +132,8 @@ class cli_plugin_dev extends CLIPlugin
             case 'cleanLang':
                 return $this->cmdCleanLang();
             case 'test':
-                return $this->cmdTest();
+                $filter = $options->getOpt('filter');
+                return $this->cmdTest($filter, $args);
             case 'check':
                 return $this->cmdCheck($args);
             case 'fix':
@@ -444,9 +456,13 @@ class cli_plugin_dev extends CLIPlugin
     }
 
     /**
+     * Run the unit tests for this extension
+     *
+     * @param string $filter Optional filter string for phpunit
+     * @param string[] $args Additional arguments to pass to phpunit (files)
      * @return int
      */
-    protected function cmdTest()
+    protected function cmdTest($filter = '', $args = [])
     {
         $dir = fullpath(getcwd());
         [$base, $type] = $this->getTypedNameFromDir($dir);
@@ -457,14 +473,26 @@ class cli_plugin_dev extends CLIPlugin
             $colors = 'never';
         }
 
-        $args = [
-            fullpath(__DIR__ . '/../../../_test/vendor/bin/phpunit'),
+        $bin = fullpath(__DIR__ . '/../../../_test/vendor/bin/phpunit');;
+        if (!file_exists($bin)) {
+            $this->error('Testing framework not found. Please run "composer install" in the _test/ directory first.');
+            return 1;
+        }
+
+        $runArgs = [
+            $bin,
             '--verbose',
             "--colors=$colors",
             '--configuration', fullpath(__DIR__ . '/../../../_test/phpunit.xml'),
             '--group', $type . '_' . $base,
         ];
-        $cmd = join(' ', array_map('escapeshellarg', $args));
+        if ($filter) {
+            $runArgs[] = '--filter';
+            $runArgs[] = $filter;
+        }
+
+        $runArgs = array_merge($runArgs, $args);
+        $cmd = join(' ', array_map('escapeshellarg', $runArgs));
         $this->info("Running $cmd");
 
         $result = 0;
@@ -527,7 +555,7 @@ class cli_plugin_dev extends CLIPlugin
 
         $result = 0;
         passthru($cmd, $result);
-        if($result !== 0) return $result;
+        if ($result !== 0) return $result;
 
         // now run phpcbf to clean up code style
         $args = [
