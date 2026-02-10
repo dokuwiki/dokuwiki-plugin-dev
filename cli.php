@@ -35,6 +35,7 @@ class cli_plugin_dev extends CLIPlugin
             'addTest');
         $options->registerCommand('addConf', 'Add the configuration files. (conf/)');
         $options->registerCommand('addLang', 'Add the language files. (lang/)');
+        $options->registerCommand('addAgents', 'Add an initial AGENTS.md file for guiding LLM coding agents');
 
         $types = PluginController::PLUGIN_TYPES;
         array_walk(
@@ -113,6 +114,8 @@ class cli_plugin_dev extends CLIPlugin
                 return $this->cmdAddConf();
             case 'addLang':
                 return $this->cmdAddLang();
+            case 'addAgents':
+                return $this->cmdAddAgents();
             case 'addComponent':
                 $type = array_shift($args);
                 $component = array_shift($args);
@@ -339,6 +342,19 @@ class cli_plugin_dev extends CLIPlugin
     {
         $skeletor = Skeletor::fromDir(getcwd());
         $skeletor->addLang(is_dir('conf'));
+        $this->createFiles($skeletor->getFiles());
+        return 0;
+    }
+
+    /**
+     * Add AGENTS.md
+     *
+     * @return int
+     */
+    protected function cmdAddAgents()
+    {
+        $skeletor = Skeletor::fromDir(getcwd());
+        $skeletor->addAgents();
         $this->createFiles($skeletor->getFiles());
         return 0;
     }
