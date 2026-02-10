@@ -203,6 +203,16 @@ class Skeletor
         }
     }
 
+    /**
+     * Add the AGENTS.md file
+     *
+     * @return void
+     */
+    public function addAgents()
+    {
+        $this->loadSkeleton('AGENTS.md');
+    }
+
     // endregion
 
 
