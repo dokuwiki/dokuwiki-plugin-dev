@@ -4,13 +4,15 @@ This file provides guidance to AI agents when working with code in this reposito
 
 **Always update this file automatically when you learn new things about the code base!**
 
+**Never assume existence of functions or variables. If you haven't found them in code, but you assume they exist, always ask for confirmation.**
+
 ## Project Overview
 
 This is the @@PLUGIN_NAME@@ DokuWiki plugin.
 
 It's for @@PLUGIN_DESC@@
 
-**FIXME** replace this section with a more detailled description when you first inspect or extend the codebase.
+**FIXME** Replace this section with a more detailed description of the plugin's purpose and specific file structure (e.g., frontend assets, script locations, and main classes) when you first inspect or extend the codebase.
 
 ## Testing
 
@@ -39,6 +41,8 @@ Each test run will provide a fresh DokuWiki instance in a temporary directory vi
 
 ## Linting, Formatting and Conventions
 
+### PHP
+
 Adhere to PSR-12 coding standards. Always add proper docblocks with descriptions, parameter types, and return types to all classes, methods and functions.
 
 ```bash
@@ -48,6 +52,27 @@ Adhere to PSR-12 coding standards. Always add proper docblocks with descriptions
 # Auto-Fix formatting issues using PHP_CBF and Rector (must be run from repo root)
 ../../../bin/plugin.php dev fix
 ```
+
+### JavaScript
+
+Frontend JavaScript targets modern browsers (Chrome, Safari, Firefox, Edge). Use ES2015+ features such as `const`/`let` and classes where appropriate.
+Add JSDoc and other comments for non-trivial code.
+
+**FIXME** Define jQuery usage policy for this specific plugin.
+
+### CSS / Styles
+
+Both `.css` and `.less` files are supported and loaded.
+Create style files to target specific modes:
+
+* **all** - `all.<EXT>` for all viewing modes
+* **screen** - `style.<EXT>` or `screen.<EXT>`
+* **print** - `print.<EXT>` for print styles
+
+**Naming:** Prefix class names and IDs with `plugin__@@PLUGIN_NAME@@`.
+
+**Utility:** Use DokuWiki's global `.hidden` class for visibility toggles.
+
 
 ## Plugin Architecture
 
@@ -64,3 +89,33 @@ Inspect the base plugin classes in `../../../inc/Extension/` to learn about the 
 ```
 
 Additional classes are autoloaded when using the `dokuwiki\plugin\@@PLUGIN_NAME@@` namespace.
+
+### Localization
+
+Text output to users should not be hardcoded, but stored as language strings in the `lang/` directory of the plugin.
+
+If not present yet, initialize via dev plugin:
+
+```bash
+# add new English default files (must be run from repo root)
+../../../bin/plugin.php dev addLang
+```
+
+#### JavaScript Localization
+
+Put all localization strings for use in JavaScript into the `lang/` directory with the `['js']` array key:
+
+```php
+$lang['js']['identifier'] = 'Content';
+```
+
+In JavaScript files, fetch them from the global object: `LANG.plugins.@@PLUGIN_NAME@@.<identifier>`.
+
+### Plugin Configuration
+
+Put all plugin configuration options in the `conf/` directory. If it doesn't exist, initialize with the dev plugin:
+
+```bash
+# add config files (must be run from repo root)
+../../../bin/plugin.php dev addConf
+```
