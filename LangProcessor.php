@@ -6,7 +6,6 @@ use splitbrain\phpcli\CLI;
 
 class LangProcessor
 {
-
     /** @var CLI */
     protected $logger;
 
@@ -37,12 +36,12 @@ class LangProcessor
         $drop = array_diff_key($lang, $this->codeKeys);
         if (isset($found['js']) && isset($lang['js'])) {
             $drop['js'] = array_diff_key($lang['js'], $found['js']);
-            if (!count($drop['js'])) unset($drop['js']);
+            if ($drop['js'] === []) unset($drop['js']);
         }
 
         foreach ($drop as $key => $value) {
             if (is_array($value)) {
-                foreach ($value as $subkey => $subvalue) {
+                foreach (array_keys($value) as $subkey) {
                     $this->removeLangKey($file, $subkey, $key);
                 }
             } else {
@@ -63,7 +62,7 @@ class LangProcessor
         include $file;
 
         $drop = array_diff_key($lang, $this->settingKeys);
-        foreach ($drop as $key => $value) {
+        foreach (array_keys($drop) as $key) {
             $this->removeLangKey($file, $key);
         }
     }
@@ -117,7 +116,9 @@ class LangProcessor
                 new \RecursiveDirectoryIterator('.', \RecursiveDirectoryIterator::SKIP_DOTS),
                 function ($file) {
                     /** @var \SplFileInfo $file */
-                    if ($file->isFile() && $file->getExtension() != 'php' && $file->getExtension() != 'js') return false;
+                    if ($file->isFile() && $file->getExtension() != 'php' && $file->getExtension() != 'js') {
+                        return false;
+                    }
                     return $file->getFilename()[0] !== '.';
                 }
             )
@@ -127,8 +128,8 @@ class LangProcessor
         foreach ($ite as $file) {
             /** @var \SplFileInfo $file */
             $path = str_replace('\\', '/', $file->getPathname());
-            if (substr($path, 0, 7) == './lang/') continue; // skip language files
-            if (substr($path, 0, 9) == './vendor/') continue; // skip vendor files
+            if (str_starts_with($path, './lang/')) continue; // skip language files
+            if (str_starts_with($path, './vendor/')) continue; // skip vendor files
 
             if ($file->getExtension() == 'php') {
                 $found = array_merge($found, $this->phpExtract($path));
@@ -229,7 +230,6 @@ class LangProcessor
                 if (!isset($found[$key])) {
                     $found[$key] = $file . ':' . ($lno + 1);
                 }
-
             }
         }
 

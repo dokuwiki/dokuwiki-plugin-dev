@@ -10,7 +10,7 @@ try {
         echo $archive;
         exit;
     }
-} catch (Exception $ignored) {
+} catch (Exception) {
     // errors should only happen when the frontend validation is ignored
 }
 

@@ -37,7 +37,7 @@ class PluginWizard
         foreach ($_POST['components'] as $id) {
             [$type, , , $component] = array_pad(explode('_', $id, 4), 4, '');
             if (isset($_POST['options'][$id])) {
-                $options = array_filter(array_map('trim', explode(',', $_POST['options'][$id])));
+                $options = array_filter(array_map(trim(...), explode(',', $_POST['options'][$id])));
             } else {
                 $options = [];
             }
@@ -66,6 +66,6 @@ class PluginWizard
 
     public function getEvents()
     {
-        return array_map('trim', file(__DIR__ . '/../events.txt', FILE_IGNORE_NEW_LINES));
+        return array_map(trim(...), file(__DIR__ . '/../events.txt', FILE_IGNORE_NEW_LINES));
     }
 }

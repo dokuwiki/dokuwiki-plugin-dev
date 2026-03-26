@@ -19,11 +19,22 @@ class @@PLUGIN_COMPONENT_NAME@@ extends \dokuwiki\Extension\CLIPlugin
         $options->registerArgument('FIXME:argumentName', 'FIXME:argument description', 'FIXME:required? true|false');
 
         // options
-        // $options->registerOption('FIXME:longOptionName', 'FIXME: helptext for option', 'FIXME: optional shortkey', 'FIXME:needs argument? true|false', 'FIXME:if applies only to subcommand: subcommandName');
+        // $options->registerOption(
+        //     'FIXME:longOptionName',
+        //     'FIXME: helptext for option',
+        //     'FIXME: optional shortkey',
+        //     'FIXME:needs argument? true|false',
+        //     'FIXME:if applies only to subcommand: subcommandName'
+        // );
 
         // sub-commands and their arguments
         // $options->registerCommand('FIXME:subcommandName', 'FIXME:subcommand description');
-        // $options->registerArgument('FIXME:subcommandArgumentName', 'FIXME:subcommand-argument description', 'FIXME:required? true|false', 'FIXME:subcommandName');
+        // $options->registerArgument(
+        //     'FIXME:subcommandArgumentName',
+        //     'FIXME:subcommand-argument description',
+        //     'FIXME:required? true|false',
+        //     'FIXME:subcommandName'
+        // );
     }
 
     /** @inheritDoc */

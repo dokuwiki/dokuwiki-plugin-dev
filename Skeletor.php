@@ -13,10 +13,10 @@ use RuntimeException;
 class Skeletor
 {
     // FIXME this may change upstream we may want to update it via github action
-    const PLUGIN_TYPES = ['auth', 'admin', 'syntax', 'action', 'renderer', 'helper', 'remote', 'cli'];
+    public const PLUGIN_TYPES = ['auth', 'admin', 'syntax', 'action', 'renderer', 'helper', 'remote', 'cli'];
 
-    const TYPE_PLUGIN = 'plugin';
-    const TYPE_TEMPLATE = 'template';
+    public const TYPE_PLUGIN = 'plugin';
+    public const TYPE_TEMPLATE = 'template';
 
     protected $type;
     protected $base;
@@ -65,7 +65,7 @@ class Skeletor
      * @param string $dir
      * @return Skeletor
      */
-    static public function fromDir($dir)
+    public static function fromDir($dir)
     {
         if (file_exists($dir . '/plugin.info.txt')) {
             $type = self::TYPE_PLUGIN;
@@ -76,9 +76,7 @@ class Skeletor
         }
 
         $data = file($dir . '/' . $type . '.info.txt', FILE_IGNORE_NEW_LINES);
-        $data = array_map(function ($item) {
-            return array_map('trim', sexplode(' ', $item, 2, ''));
-        }, $data);
+        $data = array_map(fn($item) => array_map(trim(...), sexplode(' ', $item, 2, '')), $data);
         $data = array_combine(array_column($data, 0), array_column($data, 1));
 
         return new self($type, $data['base'], $data['desc'], $data['author'], $data['email'], $data['url']);
