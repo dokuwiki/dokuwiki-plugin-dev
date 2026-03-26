@@ -36,6 +36,7 @@ class cli_plugin_dev extends CLIPlugin
         $options->registerCommand('addConf', 'Add the configuration files. (conf/)');
         $options->registerCommand('addLang', 'Add the language files. (lang/)');
         $options->registerCommand('addAgents', 'Add an initial AGENTS.md file for guiding LLM coding agents');
+        $options->registerOption('claude', 'Symlink the AGENTS.md to CLAUDE.md for use with claude code', 'c', false, 'addAgents');
 
         $types = PluginController::PLUGIN_TYPES;
         array_walk(
@@ -115,7 +116,8 @@ class cli_plugin_dev extends CLIPlugin
             case 'addLang':
                 return $this->cmdAddLang();
             case 'addAgents':
-                return $this->cmdAddAgents();
+                $claude = $options->getOpt('claude');
+                return $this->cmdAddAgents($claude);
             case 'addComponent':
                 $type = array_shift($args);
                 $component = array_shift($args);
@@ -351,11 +353,14 @@ class cli_plugin_dev extends CLIPlugin
      *
      * @return int
      */
-    protected function cmdAddAgents()
+    protected function cmdAddAgents($claude)
     {
         $skeletor = Skeletor::fromDir(getcwd());
         $skeletor->addAgents();
         $this->createFiles($skeletor->getFiles());
+        if($claude && !file_exists('CLAUDE.md')) {
+            symlink('AGENTS.md', 'CLAUDE.md') && $this->success('Created symlink CLAUDE.md -> AGENTS.md');
+        }
         return 0;
     }
 
