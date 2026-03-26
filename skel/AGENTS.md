@@ -12,9 +12,9 @@ It's for @@PLUGIN_DESC@@
 
 **FIXME** replace this section with a more detailled description when you first inspect or extend the codebase.
 
-## Testing
+## Automated Testing
 
-Tests run via DokuWiki's PHPUnit-based testing framework:
+Tests run via DokuWiki's PHPUnit-based testing framework. The calls MUST be made from within the plugin's repository root using a relative path to the `bin/plugin.php` script!
 
 ```bash
 # Tests must be run from repository root
@@ -36,6 +36,19 @@ DokuWiki provides useful helper methods for testing:
 * use `../../../_test/phpQuery-onefile.php` if you need to parse HTML in tests
 
 Each test run will provide a fresh DokuWiki instance in a temporary directory via the default setupBeforeClass methods.
+
+**Important:** Test classes that need the plugin must set `protected $pluginsEnabled = ['@@PLUGIN_NAME@@'];` to enable it in the test environment.
+
+**Important:** `setUp()` and `tearDown()` methods must be `public` (not `protected`) to match the `DokuWikiTest` base class.
+
+
+## Caching
+
+DokuWiki may cache JavaScript, CSS and rendered output. To reset the cache just touch the config file
+
+```bash
+touch ../../../conf/local.php
+```
 
 ## Linting, Formatting and Conventions
 
